@@ -14,7 +14,7 @@
 
 from util import manhattanDistance
 from game import Directions
-import random, util
+import random, util, sys
 
 from game import Agent
 
@@ -75,8 +75,31 @@ class ReflexAgent(Agent):
         newGhostStates = successorGameState.getGhostStates()
         newScaredTimes = [ghostState.scaredTimer for ghostState in newGhostStates]
 
-        "*** YOUR CODE HERE ***"
-        return successorGameState.getScore()
+        food_score = sys.maxsize
+        for food in newFood.asList():
+            distance = manhattanDistance(newPos, food)
+            if distance < food_score:
+                food_score = float(distance)
+
+        ghost_distance_score = 0.0
+        total_ghost_distances = 0.1
+        ghosts = successorGameState.getGhostPositions()
+        for ghost in ghosts:
+            ghost_distance = manhattanDistance(ghost, newPos)
+            total_ghost_distances += ghost_distance
+            if ghost_distance <= 1:
+                ghost_distance_score += -1
+
+        scared_time_score = sum(newScaredTimes) / len(newScaredTimes)
+
+        score = 0.0
+        score += successorGameState.getScore()
+        score += 2 * (1 / food_score)
+        score += -2 * (1 / total_ghost_distances)
+        score += 5 * ghost_distance_score
+        score += scared_time_score
+
+        return score
 
 
 def scoreEvaluationFunction(currentGameState):
