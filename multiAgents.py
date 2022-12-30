@@ -204,8 +204,45 @@ class AlphaBetaAgent(MultiAgentSearchAgent):
         """
         Returns the minimax action using self.depth and self.evaluationFunction
         """
-        "*** YOUR CODE HERE ***"
-        util.raiseNotDefined()
+
+        action_score = []
+        agents_count = gameState.getNumAgents()
+
+        def alpha_beta(state, iter_count, alpha, beta):
+            if state.isWin() or state.isLose() or iter_count >= self.depth * agents_count:
+                return self.evaluationFunction(state)
+            iter_mod_agents = iter_count % agents_count
+            if iter_mod_agents != 0:
+                result = sys.maxsize
+                for action in state.getLegalActions(iter_mod_agents):
+                    if action != "Stop":
+                        new_state = state.generateSuccessor(iter_mod_agents, action)
+                        alpha_beta_result = alpha_beta(new_state, iter_count + 1, alpha, beta)
+                        if alpha_beta_result < result:
+                            result = alpha_beta_result
+                        if result < beta:
+                            beta = result
+                        if beta < alpha:
+                            break
+                return result
+            else:
+                result = -sys.maxsize
+                for action in state.getLegalActions(iter_mod_agents):
+                    if action != "Stop":
+                        new_state = state.generateSuccessor(iter_mod_agents, action)
+                        alpha_beta_result = alpha_beta(new_state, iter_count + 1, alpha, beta)
+                        if alpha_beta_result > result:
+                            result = alpha_beta_result
+                        if result > alpha:
+                            alpha = result
+                        if iter_count == 0:
+                            action_score.append(result)
+                        if beta < alpha:
+                            break
+                return result
+
+        alpha_beta(gameState, 0, -sys.maxsize, sys.maxsize)
+        return [a for a in gameState.getLegalActions(0) if a != "Stop"][action_score.index(max(action_score))]
 
 
 class ExpectimaxAgent(MultiAgentSearchAgent):
